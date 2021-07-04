@@ -21,13 +21,12 @@ struct Airport: Decodable, Equatable{
     
    
 }
-struct Movies: Decodable, Equatable{
+struct Movies: Decodable{
     
-    let airportCode: String
-    let timezone: String
-    let city: String
-    let state: String
-    let airportName: String
+    let title: String?
+    let imageHref: String?
+    let rating: Double?
+    let releaseDate: String?
     
    
 }

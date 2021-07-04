@@ -6,17 +6,124 @@
 //
 
 import Foundation
+import Network
 
 class MoviesViewModel: NSObject {
-    
+ 
+/****References**/
 //private(set) modifier example taken from StackOverflow https://stackoverflow.com/questions/37264824/how-does-public-privateset-access-modifiers-work
+//JSON serialiazation https://developer.apple.com/swift/blog/?id=37
     
-    private(set) var movData : Movies! {
+    private(set) var movData : [Movies]! {
         didSet {
             self.bindMoviesViewModelToController()
         }
     }
+    
     var bindMoviesViewModelToController : (() -> ()) = {}
+    /*
+     func apiToGetEmployeeData(completion : @escaping (Employees) -> ()){
+         URLSession.shared.dataTask(with: sourcesURL) { data, urlResponse, error in
+             if let data = data {
+                 let jsonDecoder = JSONDecoder()
+                 let empData = try! jsonDecoder.decode(Employees.self, from: data)
+                 print(empData)
+                 completion(empData)
+             }
+         }.resume()
+     }
+     */
+    var internetAvailble = false
+    let sourcesURL = URL(string: "https://mocki.io/v1/91fba448-7ed6-4121-8f1a-a50de82d820f")
+    
+    
+    override init() {
+        super.init()
+        apiTogetMoviesData()
+        
+    }
+    
+    /****  Fetch Json Data for Movies**/
+    func apiTogetMoviesData() {
+        
+        
+        /****  Network Checking **/
+        let internetmonitor = NWPathMonitor()
+        internetmonitor.pathUpdateHandler = { path in
+            if path.status == .satisfied {
+                print("Internet Connection available!")
+                
+                /****  fetch local json data **/
+                
+                do {
+                    if let bundlePath = Bundle.main.path(forResource: "movies",
+                                                             ofType: "json"),
+                            let jsonData = try String(contentsOfFile: bundlePath).data(using: .utf8)
+                    {
+                        print("enter")
+                        print(jsonData)
+                        do {
+                            let jsonResult = try? JSONSerialization.jsonObject(with: jsonData, options: JSONSerialization.ReadingOptions.mutableContainers) as? [String: Any]
+                            
+                            
+                            
+                            if let movieData = jsonResult!["movies"] as? [[String:Any]]
+                            {
+                                var dataArray : [Movies] = []
+                                            for category in movieData {
+                                                let mov = Movies(title:category["title"] as? String, imageHref: category["imageHref"] as? String, rating: category["rating"] as? Double, releaseDate: category["releaseDate"] as? String)
+                                                
+                                                dataArray.append(mov)
+                                            }
+                                self.movData = dataArray
+                                        }
+                           // print(self.movData!)
+                                //let decodedData = try JSONDecoder().decode(Movies.self,
+                                  //                                         from: movieData)
+                                
+                                
+                                //print("Title: ", decodedData.title)
+                                
+                            } catch let fileErr{
+                                print("decode error",fileErr)
+                            }
+                    }
+                    
+                } catch {
+                    print("enter error")
+                        print(error)
+                    }
+
+                        
+                /****  fetch image from imageURL asynchronously **/
+                /*
+                guard let url = self.sourcesURL else { return }
+                URLSession.shared.dataTask(with: url) { (data, response, error) in
+                    guard let data = data else { return }
+                    let trans = try! JSONDecoder().decode([Airport].self, from: data)
+                    DispatchQueue.main.async {
+                        self.internetAvailble = true
+                        //self.trans = trans
+                       // print(trans)
+                    }
+                    print(" Transport API values fetched Successfully")
+                    }.resume()
+                */
+                
+            } else {
+                print("No  internet connection.")
+                self.internetAvailble = false
+            }
+
+            print(path.isExpensive)
+        }
+        let queue = DispatchQueue(label: "Monitor")
+        internetmonitor.start(queue: queue)
+        
+}
+    
+    
+    
     ///////// Read from CSV file ///////////////
   
     func getAirportDatafromCSV(filename: String)->[Airport]
