@@ -21,20 +21,7 @@ class MoviesViewModel: NSObject {
     }
     
     var bindMoviesViewModelToController : (() -> ()) = {}
-    /*
-     func apiToGetEmployeeData(completion : @escaping (Employees) -> ()){
-         URLSession.shared.dataTask(with: sourcesURL) { data, urlResponse, error in
-             if let data = data {
-                 let jsonDecoder = JSONDecoder()
-                 let empData = try! jsonDecoder.decode(Employees.self, from: data)
-                 print(empData)
-                 completion(empData)
-             }
-         }.resume()
-     }
-     */
     var internetAvailble = false
-    let sourcesURL = URL(string: "https://mocki.io/v1/91fba448-7ed6-4121-8f1a-a50de82d820f")
     
     
     override init() {
@@ -54,6 +41,9 @@ class MoviesViewModel: NSObject {
                 print("Internet Connection available!")
                 
                 /****  fetch local json data **/
+                // At first I fetched data from saved JSON file from dropbox, later realized it might be required to fetch data from server if data changes during refresh
+                
+                /*
                 
                 do {
                     if let bundlePath = Bundle.main.path(forResource: "movies",
@@ -94,21 +84,35 @@ class MoviesViewModel: NSObject {
                         print(error)
                     }
 
-                        
-                /****  fetch image from imageURL asynchronously **/
-                /*
-                guard let url = self.sourcesURL else { return }
+                 */
+                
+                /****  fetch JSON data from server **/
+               // let sourcesURL = URL(string: "https://www.dropbox.com/s/q1ins5dsldsojzt/movies.json?dl=1")
+                /* Dropbox JSON API data needed to be fixed, some image URL without https, issue with security pupose, can't fetch image, that is why created new API*/
+                
+                let sourcesURL = URL(string: "https://mocki.io/v1/393ab11e-d0ed-4c22-8244-cfaabc186bed")
+                self.movData = []
+                guard let url = sourcesURL else { return }
                 URLSession.shared.dataTask(with: url) { (data, response, error) in
                     guard let data = data else { return }
-                    let trans = try! JSONDecoder().decode([Airport].self, from: data)
-                    DispatchQueue.main.async {
-                        self.internetAvailble = true
-                        //self.trans = trans
-                       // print(trans)
-                    }
-                    print(" Transport API values fetched Successfully")
+                    let jsonResult = try? JSONSerialization.jsonObject(with: data, options: JSONSerialization.ReadingOptions.mutableContainers) as? [String: Any]
+                    
+                    
+                    
+                    if let movieData = jsonResult!["movies"] as? [[String:Any]]
+                    {
+                        var dataArray : [Movies] = []
+                                    for category in movieData {
+                                        let mov = Movies(title:category["title"] as? String, imageHref: category["imageHref"] as? String, rating: category["rating"] as? Double, releaseDate: category["releaseDate"] as? String)
+                                        
+                                        dataArray.append(mov)
+                                    }
+                        self.movData = dataArray
+                        print(self.movData!)
+                                }
+                    print(" Movie API values fetched Successfully")
                     }.resume()
-                */
+                
                 
             } else {
                 print("No  internet connection.")
@@ -124,86 +128,6 @@ class MoviesViewModel: NSObject {
     
     
     
-    ///////// Read from CSV file ///////////////
-  
-    func getAirportDatafromCSV(filename: String)->[Airport]
-{
-    var dataArray : [Airport] = []
-    if  let path = Bundle.main.path(forResource: filename, ofType: "csv")
-          {
-            
-            let url = URL(fileURLWithPath: path)
-            do {
-                let data = try Data(contentsOf: url)
-                let dataEncoded = String(data: data, encoding: .utf8)
-               if let rows = dataEncoded?.components(separatedBy: "\r\n")
-               {
-                        for row in rows {
-                            let columns = row.components(separatedBy: "\t")
-                            if columns != [""] {
-                                //print(columns[0])
-                                let airP = Airport(airportCode: columns[0], timezone: columns[1], city: columns[2], state: columns[3], airportName: columns[4])
-                                
-                                dataArray.append(airP)
-                            }
-                            
-                        }
-        
-                
-               }
-            }
-                 
-                
-            catch let fileErr {
-                print("\n Error read CSV file: \n ", fileErr)
-            }
-           
-        
-            }
-    if dataArray.isEmpty  {
-        dataArray = [Airport(airportCode: "No Data", timezone: "No Data", city: "No Data", state: "No Data", airportName: "No Data")]
-    }
-    
-    return dataArray
-    
-}
    
-    ///////// Sort  by AirportName ///////////////
-    func SortedAirportName(airName:[Airport])->[Airport]
-    {
-        //let sortedName = (airTzone as NSArray).sortedArray(using: [NSSortDescriptor(key: $0.name , ascending: true)]) as! [Airport]
-        let sortedName = airName.sorted(by: { $0.airportName < $1.airportName })
-       return sortedName
-        
-    }
-    
-    
-///////// Sort and broup by Timezone ///////////////
-    func SortedAirportTimezone(airTzone:[Airport])->[GroupedAirPort]
-    {
-        let sortedTzone = airTzone.sorted(by: { $0.timezone < $1.timezone })
-        let groupByCategory = Dictionary(grouping: sortedTzone) { $0.timezone }
-        
-       // print(groupByCategory["America/Los_Angeles"]!)
-        
-        
-        //print(groupByCategory)
-        var valarr = [GroupedAirPort]()
-        
-         
-        for k in groupByCategory.values
-        {
-            print(k.count)
-            
-            let airportDict = GroupedAirPort(sortedzone: k[0].timezone, data: k)
-            valarr.append(airportDict)
-            
-            
-        }
-        
-         
-        return valarr
-    }
- 
     
 }
