@@ -23,6 +23,7 @@ class MoviesCollectionViewCell: UICollectionViewCell
     func configure(with movie: Movies, photosManager: PhotosManager) {
         self.photosManager = photosManager
         self.movie = movie
+        //check if imageURL has value otherwise load default image
         if let urlvalue = self.movie?.imageHref
         {
             loadImage(with: urlvalue)
@@ -50,6 +51,7 @@ class MoviesCollectionViewCell: UICollectionViewCell
         request = photosManager?.retrieveImage(for: url) { image in
             self.populate(with: image)
         }
+        
     }
 
     func populate(with image: UIImage) {

@@ -6,7 +6,8 @@
 //
 
 import XCTest
-
+@testable
+import MoviesApp
 class MoviesAppTests: XCTestCase {
 
     override func setUpWithError() throws {
@@ -18,15 +19,16 @@ class MoviesAppTests: XCTestCase {
     }
 
     func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        let manager = MoviesViewModel()
+            XCTAssertTrue(manager.movData.count == 0, "Start with empty Movie list")
+            manager.addItem()
+            XCTAssertTrue(manager.movData.count == 1, "Should have one Movie afer adding")
+            manager.addItem()
+            manager.addItem() // added 3 movie
+            manager.delete(at: [1])
+            XCTAssertTrue(manager.movData.count == 2, "Should have 2 items in Movie list")
+        
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
 
 }

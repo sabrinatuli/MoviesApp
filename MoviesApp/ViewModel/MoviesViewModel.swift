@@ -16,16 +16,20 @@ class MoviesViewModel: NSObject {
     
     private(set) var movData : [Movies]! {
         didSet {
+            //when not empty will call bindMoviesViewModelToController to bind data with collectionviewcontroller
+            // usually use Combine framework for data binding, but supported from iOS 13, not 12
             self.bindMoviesViewModelToController()
         }
     }
     
+
     var bindMoviesViewModelToController : (() -> ()) = {}
     var internetAvailble = false
     
     
     override init() {
         super.init()
+        self.movData = []
         apiTogetMoviesData()
         
     }
@@ -91,7 +95,7 @@ class MoviesViewModel: NSObject {
                 /* Dropbox JSON API data needed to be fixed, some image URL without https, issue with security pupose, can't fetch image, that is why created new API*/
                 
                 let sourcesURL = URL(string: "https://mocki.io/v1/393ab11e-d0ed-4c22-8244-cfaabc186bed")
-                self.movData = []
+                
                 guard let url = sourcesURL else { return }
                 URLSession.shared.dataTask(with: url) { (data, response, error) in
                     guard let data = data else { return }
@@ -126,7 +130,18 @@ class MoviesViewModel: NSObject {
         
 }
     
+    func addItem() {
+
+        self.movData.append(Movies(title:"X-Men", imageHref: "https://flxt.tmsimg.com/assets/p25028_p_v10_aa.jpg", rating: 7.4, releaseDate: "13 July 2000"))
+     }
     
+ 
+
+     func delete(at indexSet: IndexSet) {
+        for index in indexSet {
+            self.movData.remove(at: index)
+        }
+     }
     
    
     
