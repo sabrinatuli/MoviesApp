@@ -38,7 +38,7 @@ class MoviesViewController: UICollectionViewController {
     }
     @objc private func refreshMovieData(_ sender: Any) {
         
-        // add new movie data
+        // add new movie datas
         self.movies.append(Movies(title:"X-Men", imageHref: "https://flxt.tmsimg.com/assets/p25028_p_v10_aa.jpg", rating: 7.4, releaseDate: "13 July 2000"))
         self.movies.append(Movies(title:"X-Men: Dark Phoenix", imageHref: "https://thumbor.forbes.com/thumbor/711x1125/https://blogs-images.forbes.com/scottmendelson/files/2019/02/New-X-Men-Poster-Dark-Phoenix_1200_1900_81_s-1200x1900.jpg?width=960", rating: 5.7, releaseDate: "5 June 2019"))
         self.collectionView.reloadData()
